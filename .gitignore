@@ -2,7 +2,7 @@
 *.bbl
 *.bcf
 *.blg
-*fdb_latex_mk
+*.fdb_latex_mk
 *.fls
 *.log
 *.xml
