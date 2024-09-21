@@ -1,0 +1,159 @@
+\documentclass[12pt,twoside]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{setspace}
+\graphicspath{ {./images/} }
+% determime the page layout + allow the inclination of even and odd page are the same.
+\usepackage[a4paper,width=150mm,top=25mm,bottom=25mm,bindingoffset=6mm]{geometry}
+\usepackage{emptypage}  % Ensures no headers or footers on empty pages
+
+\usepackage[style=alphabetic]{biblatex}
+\addbibresource{references.bib}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
+\usetikzlibrary {shapes.geometric}
+
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\setlength{\headheight}{14.49998pt}
+
+% Initial fancyhdr setup
+\fancyhead{}
+\fancyhead[RO,LE]{Thesis Title}
+\fancyfoot{}
+\fancyfoot[LE,RO]{\thepage}
+\fancyfoot[LO,CE]{Chapter \thechapter}
+\fancyfoot[CO,RE]{Author Name}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\begin{document}
+\begin{titlepage}
+  \begin{center}
+  \begin{tikzpicture}[remember picture, overlay]
+    \draw [line width=1pt]
+        ($ (current page.north west) + (1.5cm,-2.0cm) $)
+      rectangle
+      ($ (current page.south east) + (-1.5cm,1.8cm) $);
+    
+  \end{tikzpicture}
+
+  \begin{figure}[htbp]
+    \begin{minipage}{0.5\linewidth}
+    \centering
+    \includegraphics[width=\textwidth]{vgu_logo.jpg}
+    \end{minipage}
+    \hfill{\hspace{2cm}}
+    \begin{minipage}{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{FRA-UAS.png}
+    \end{minipage}
+    \end{figure}
+
+    \vspace*{1cm}
+
+    \textbf{\large \uppercase{vietnamese - german university}}
+
+    \vspace*{0.5cm}
+
+    \textbf{\large \uppercase{Frankfurt university of applied sciences}}
+
+    \vspace*{0.5cm}
+
+    \uppercase{\large Faculty of engineering}
+
+    \vspace*{0.5cm}
+
+    \uppercase{\large Computer Science Department}
+
+    \vspace{1.5cm}
+    \uppercase{Bachelor Thesis}
+    \vspace{1.5cm}
+
+
+    \textbf{\LARGE 
+    Evaluation And Implementation of}
+    \vspace{0.3cm}
+
+    \textbf {\LARGE Modern Virtual Private Network }
+
+    \vspace{0.3cm}
+    \textbf{\LARGE Protocol for The GNRC Network Stack}
+
+    \vspace{1.2cm}
+    \large By
+    \vspace{0.2cm}
+
+    \large Le Hoang Dang Nguyen
+    \vspace{0.2cm}
+
+    \large Matriculation number: 17028
+    \vspace{0.2cm}
+
+    \begin{flushleft}
+    \hspace{0.3cm}
+    \textbf{Assessor:}
+    \begin{enumerate}
+      \item Prof. Dr. Oliver Hahm
+      \item Dr. Tran Thi Thu Huong
+    \end{enumerate}
+    \end{flushleft}
+
+    \vfill
+
+    Binh Duong, 2024
+
+  \end{center}
+\end{titlepage}
+
+\newpage  % Start a new page
+\thispagestyle{empty}  % Suppress headers and footers
+\hbox{}  % Empty box to position text
+\vfill  % Vertically center the content
+\begin{center}
+\Large This page intentionally left blank.
+\end{center}
+\vfill  % Fill the rest of the page vertically
+
+\newpage  % Start a new page after the blank one
+
+\chapter *{\centering Declaration}
+\doublespacing
+\large I hereby declare that this thesis is a product of my own work, unless
+otherwise referenced. I also declare that all opinions, results, conclusions
+and recommendations are my own and may not represent the policies or
+opinions of Vietnamese – German University.
+
+\vspace{12cm}  % Space above the signature line
+
+\noindent\hfill\rule{8cm}{0.4pt}  % Right-aligned line for the signature
+\vspace{0.5cm} % Space between the line and the name
+
+\noindent\hspace{8cm} Le Hoang Dang Nguyen % Right-aligned line for the signature
+
+\chapter*{\centering Acknowledgements}
+I want to thank you.
+
+\chapter*{\centering Abstract}
+Abstract go here
+
+\tableofcontents
+
+\input{chapters/introduction}
+\input{chapters/6lowpan}
+\input{chapters/gnrc}
+\input{chapters/wireguard}
+\input{chapters/eval}
+\input{chapters/related}
+\input{chapters/design_and_impl}
+\input{chapters/testing}
+\input{chapters/conclusion}
+
+\printbibliography[title={References}]
+
+\end{document}
