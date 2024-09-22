@@ -167,3 +167,117 @@
       primaryClass={cs.NI},
       url={https://arxiv.org/abs/1502.01968}, 
 }
+
+@mastersthesis{pwu,
+  author = {Peter Wu},
+  school = {Eindhoven University of Technology},
+  title = {Analysis of the WireGuard protocol},
+  year = {2019},
+}
+
+@misc{rfc8439,
+    series =    {Request for Comments},
+    number =    8439,
+    howpublished =  {RFC 8439},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC8439},
+    url =       {https://www.rfc-editor.org/info/rfc8439},
+    author =    {Yoav Nir and Adam Langley},
+    title =     {{ChaCha20 and Poly1305 for IETF Protocols}},
+    pagetotal = 46,
+    year =      2018,
+    month =     jun,
+    abstract =  {This document defines the ChaCha20 stream cipher as well as the use of the Poly1305 authenticator, both as stand-alone algorithms and as a "combined mode", or Authenticated Encryption with Associated Data (AEAD) algorithm. RFC 7539, the predecessor of this document, was meant to serve as a stable reference and an implementation guide. It was a product of the Crypto Forum Research Group (CFRG). This document merges the errata filed against RFC 7539 and adds a little text to the Security Considerations section.},
+}
+
+@misc{noise,
+  author = {Trevor Perrin},
+  title = {The Noise Protocol Framework},
+  url = {https://noiseprotocol.org/noise.pdf},
+  note = {revision 34, 2018-07-11},
+}
+
+@InProceedings{curve,
+author="Bernstein, Daniel J.",
+editor="Yung, Moti
+and Dodis, Yevgeniy
+and Kiayias, Aggelos
+and Malkin, Tal",
+title="Curve25519: New Diffie-Hellman Speed Records",
+booktitle="Public Key Cryptography - PKC 2006",
+year="2006",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="207--228",
+abstract="This paper explains the design and implementation of a high-security elliptic-curve-Diffie-Hellman function achieving record-setting speeds: e.g., 832457 Pentium III cycles (with several side benefits: free key compression, free key validation, and state-of-the-art timing-attack protection), more than twice as fast as other authors' results at the same conjectured security level (with or without the side benefits).",
+isbn="978-3-540-33852-9"
+}
+
+@misc{chacha20,
+  author = {Daniel J. Bernstein},
+  title = {ChaCha, a variant of Salsa20},
+  year = {2008},
+url = {https://cr.yp.to/chacha/chacha-20080120.pdf},
+}
+
+@misc{poly1305,
+  author = {Daniel J. Bernstein},
+  title = {The Poly1305-AES message-authentication code},
+  year = {2005},
+  url = {https://cr.yp.to/mac/poly1305-20050329.pdf},
+}
+
+@misc{rfc7693,
+    series =    {Request for Comments},
+    number =    7693,
+    howpublished =  {RFC 7693},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC7693},
+    url =       {https://www.rfc-editor.org/info/rfc7693},
+    author =    {Markku-Juhani O. Saarinen and Jean-Philippe Aumasson},
+    title =     {{The BLAKE2 Cryptographic Hash and Message Authentication Code (MAC)}},
+    pagetotal = 30,
+    year =      2015,
+    month =     nov,
+    abstract =  {This document describes the cryptographic hash function BLAKE2 and makes the algorithm specification and C source code conveniently available to the Internet community. BLAKE2 comes in two main flavors: BLAKE2b is optimized for 64-bit platforms and BLAKE2s for smaller architectures. BLAKE2 can be directly keyed, making it functionally equivalent to a Message Authentication Code (MAC).},
+}
+
+@misc{rfc5869,
+    series =    {Request for Comments},
+    number =    5869,
+    howpublished =  {RFC 5869},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC5869},
+    url =       {https://www.rfc-editor.org/info/rfc5869},
+    author =    {Hugo Krawczyk and Pasi Eronen},
+    title =     {{HMAC-based Extract-and-Expand Key Derivation Function (HKDF)}},
+    pagetotal = 14,
+    year =      2010,
+    month =     may,
+    abstract =  {This document specifies a simple Hashed Message Authentication Code (HMAC)-based key derivation function (HKDF), which can be used as a building block in various protocols and applications. The key derivation function (KDF) is intended to support a wide range of applications and requirements, and is conservative in its use of cryptographic hash functions. This document is not an Internet Standards Track specification; it is published for informational purposes.},
+}
+
+@techreport{irtf-cfrg-xchacha-03,
+    number =    {draft-irtf-cfrg-xchacha-03},
+    type =      {Internet-Draft},
+    institution =   {Internet Engineering Task Force},
+    publisher = {Internet Engineering Task Force},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-irtf-cfrg-xchacha/03/},
+    author =    {Scott Arciszewski},
+    title =     {{XChaCha: eXtended-nonce ChaCha and AEAD\_XChaCha20\_Poly1305}},
+    pagetotal = 18,
+    year =      2020,
+    month =     jan,
+    day =       10,
+    abstract =  {The eXtended-nonce ChaCha cipher construction (XChaCha) allows for ChaCha-based ciphersuites to accept a 192-bit nonce with similar guarantees to the original construction, except with a much lower probability of nonce misuse occurring. This helps for long running TLS connections. This also enables XChaCha constructions to be stateless, while retaining the same security assumptions as ChaCha. This document defines XChaCha20, which uses HChaCha20 to convert the key and part of the nonce into a subkey, which is in turn used with the remainder of the nonce with ChaCha20 to generate a pseudorandom keystream (e.g. for message encryption). This document also defines AEAD\_XChaCha20\_Poly1305, a variant of {[}RFC8439{]} that utilizes the XChaCha20 construction in place of ChaCha20.},
+}
+
+@book{cpu,
+  editor = {Henk C. A. van Tilborg, Sushil Jajodia},
+  publisher = {Springer New York, NY},
+  title = {Encyclopedia of Cryptography and Security},
+  year = {2011},
+  doi = {https://doi.org/10.1007/978-1-4419-5906-5},
+  edition = {2},
+}
