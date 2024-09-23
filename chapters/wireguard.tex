@@ -533,6 +533,45 @@ The details of the IKpsk2 is presented in section \ref{ikpsk2}.
         field will be zeroed out. The data for MAC2 is all the bytes prior to the MAC2 field.
       \end{description}
     
-    
+   The third type of message is the \textbf{Cookie Reply Message}, which is sent when the current
+   peer is under load. The exact condition to transmit this cookie message is after the reception
+   of a handshake message with valid MAC1 but invalid/expired  MAC2 and the peer is under load.
+   The format of the message is as follow:
+
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=0.7\textwidth]{cookie}
+      \caption{Cookie Reply Message, see \cite[p.~13]{wireguard}.}
+      \label{fig:cookie}
+    \end{figure} 
+
+    The receiver is the sender from the previous handshake message. With a random secret value $R_m$ that changes
+    every two minutes, the concatenation of the last message's external IP source address and its 
+    UDP source port, and MAC1 as M, the encrypted cookie is created like below:
+
+    \begin{align*}
+      \tau &= \textbf{BLAKE2s}(R_m, A_{m'}) \\
+      cookie &= \textbf{XAEAD}(\tau, M, \textbf{Hash}(''cookie\texttt{--}'' \Vert S^{pub}_m), nonce)
+    \end{align*}
+
+    By using M as the additional authenticated data field, the cookie reply is securely bound 
+    to the corresponding message, preventing peers from being targeted by fraudulent cookie 
+    reply attacks. Additionally, this message is smaller than both the handshake initiation and 
+    handshake response messages, reducing the risk of amplification attacks.
+
+    The final type of messages is the Transport Data Message - the encrypted encapsulated payload
+    for secure communication. A counter is included in the packet to use as the nonce for AEAD
+    and a tool to prevent replay attack. The inner IP packet will padded with zero bytes until
+    its length is a multiple of 16 to achieve a better address alignment, thus improving the
+    performance on many CPU architectures.
+
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=0.6\textwidth]{dat}
+      \caption{Transport Data Message, see \cite[p.~12]{wireguard}.}
+      \label{fig:transdata}
+    \end{figure} 
+
+
 
 \section{Timers} \label{w4}
