@@ -4,7 +4,7 @@
   protocols, and the cryptography primitives that they build upon. 
   Section \ref{w2}  details the fondational handshake protocol that Wireguard's
   key exchange protocol builds upon. Section \ref{w3} defined all messages types of Wireguard and
-  section \ref{w4} descibes the timer state machine.
+  section \ref{w4} descibes the several timers constraint of Wireguard.
 \section{Protocol \& Cryptography} \label{w1}
 \subsection{Overview}
  Wireguard works as an encrypted IP network tunnel, resides at the layer 3 of the OSI layer, and
@@ -573,5 +573,54 @@ The details of the IKpsk2 is presented in section \ref{ikpsk2}.
     \end{figure} 
 
 
-
 \section{Timers} \label{w4}
+The Wireguard protocol leverages a simple timer state machine behind the scenes for the 
+maintenance of session states, perfect forward secrecy and handshakes. The involved constants
+for the timer state are as below:
+
+\begin{center}
+  \begin{tabular}{|c | c|} 
+   \hline
+   Symbol & Value \\
+   \hline\hline
+   \uppercase{Rekey-Afer-Messages} & $2^{60}$ messages \\ 
+   \hline
+   \uppercase{Reject-After-Messages} & $2^{64} - 2^{13} - 1$ messages \\
+   \hline
+   \uppercase{REKEY-AFTER-TIME} & 120 seconds \\
+   \hline
+   \uppercase{reject-after-time} & 180 seconds \\
+   \hline
+   \uppercase{rekey-attempt-time} & 90 seconds \\
+   \hline
+   \uppercase{rekey-timeout} & 5 seconds \\
+   \hline
+   \uppercase{keepalive-timeout} & 10 seconds \\
+   \hline
+  \end{tabular}
+  \end{center}
+
+  With multiple peers can be configured to be accepted on a host, the following are the constraints
+  applied on a per-peer basis for the handshake initiation:
+  \begin{enumerate}
+    \item There can only be one handshake initiation sent every \uppercase{REKEY-TIMEOUT}.
+    \item If there is no handshake response reception of a handshake initiation after \uppercase{rekey-timeout},
+    a new handshake initiation will be constructed and transmitted again. This attempt happens
+    for \uppercase{REKEY-attempt-time} seconds. This timer will be reset when a transport data
+    message is ready to be sent.
+    \item The handshake completion marks the starting of the age of a secure session. For the initator,
+    this age begins when the processing of handshake reponse is done and the symmetric keys have
+    been derived. For the responder, it is when the first valid transport data is received from
+    the initiator.
+    \item The only cause for a new handshake initiation is the transport data, no timer expiration
+    should trigger it.
+    \item A session that is older than \uppercase{reject-after-time} or has sent more than \uppercase{REJECT-AFTER-MESSAGES}
+    is not usable.
+    \item A handshake initiation may be sent after sending \uppercase{Rekey-after-messages}.
+    \item After the initator sends data and the \uppercase{Rekey-after-time} has passed, 
+    a new handshake initiation will be sent.
+    \item After the initator receives data and the \uppercase{Reject-after-time} - \uppercase{keepalive-timeout} 
+    - \uppercase{rekey-timeout} has passed, a new handshake initiation will be sent.
+
+
+  \end{enumerate}
