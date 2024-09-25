@@ -1,7 +1,20 @@
-\chapter{Wireguard and the IoT}
-\section{Cryptography Resilience}
-\section{Virtuous Silence}
-\section{Stateful firewall}
+\chapter{Wireguard and 6LoWPAN}
+  This chapter discusses in details security properties that Wireguard provides and both the benefits
+  and drawback of implementing these features for the 6LoWPAN protocol. Section \ref{iot:silence} is
+  about the silence nature of Wireguard. Section \ref{iot:crypt} show the resilience of WireGuard
+  against other VPN and transport layer security protocols. Section \ref{iot:cookie} is about the details of 
+  cookie mechanism. Section \ref{iot:perist} is on the optional chatty features of Wireguard.
+  Finally, section \ref{iot:mem} discusses the 6LoWPAN fragmentation impact on the Wireguard messages.
+\section{Silence is a virtue} \label{iot:silence}
+\section{Cryptography Resilience} \label{iot:crypt}
+  The design decisions of Wireguard allow the protocol itself and its implementation resistant to
+  solve many problems of the other traditional VPN protocols:
+  \begin{itemize}
+    \item Usage of modern cryptography algorithms prevents cryptographic attacks on TLS
+    such as the Sweet32 birthday attacks \cite{sweet32}, the Bleichenbacher threat on RSA encryption \cite{bleichen}, 
+    and the padding oracle attack like BEAST \cite{beast}.  Furthermore, problems with using
+    constructions like MAC-then-Encrypt in IPsec \cite{ipsec_conf} are eliminated with AEAD in Wireguard.
+  \end{itemize}
 \section{Cookies and Denial of Services Attack} \label{iot:cookie}
-\section{Roaming \& NDP}
-\section{Message Lengths \& Fragmentation}
+\section{Stateful firewall} \label{iot:perist}
+\section{Message \& Fragmentation} \label{iot:mem}

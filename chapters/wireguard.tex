@@ -576,7 +576,7 @@ The details of the IKpsk2 is presented in section \ref{ikpsk2}.
 \section{Timers} \label{w4}
 The Wireguard protocol leverages a simple timer state machine behind the scenes for the 
 maintenance of session states, perfect forward secrecy and handshakes. The involved constants
-for the timer state are as below:
+for the timers are as below:
 
 \begin{center}
   \begin{tabular}{|c | c|} 
@@ -600,20 +600,19 @@ for the timer state are as below:
   \end{tabular}
   \end{center}
 
-  With multiple peers can be configured to be accepted on a host, the following are the constraints
+  With multiple peers can be configured to be accepted on an interface, the following are the constraints
   applied on a per-peer basis for the handshake initiation:
   \begin{enumerate}
     \item There can only be one handshake initiation sent every \uppercase{REKEY-TIMEOUT}.
     \item If there is no handshake response reception of a handshake initiation after \uppercase{rekey-timeout},
     a new handshake initiation will be constructed and transmitted again. This attempt happens
-    for \uppercase{REKEY-attempt-time} seconds. This timer will be reset when a transport data
+    for \uppercase{REKEY-attempt-time} seconds. This timer will reset when a transport data
     message is ready to be sent.
     \item The handshake completion marks the starting of the age of a secure session. For the initator,
     this age begins when the processing of handshake reponse is done and the symmetric keys have
     been derived. For the responder, it is when the first valid transport data is received from
     the initiator.
-    \item The only cause for a new handshake initiation is the transport data, no timer expiration
-    should trigger it.
+    \item A timeout alone will not trigger a new handshake unless it is accompanied with the transport data.
     \item A session that is older than \uppercase{reject-after-time} or has sent more than \uppercase{REJECT-AFTER-MESSAGES}
     is not usable.
     \item A handshake initiation may be sent after sending \uppercase{Rekey-after-messages}.
@@ -621,6 +620,30 @@ for the timer state are as below:
     a new handshake initiation will be sent.
     \item After the initator receives data and the \uppercase{Reject-after-time} - \uppercase{keepalive-timeout} 
     - \uppercase{rekey-timeout} has passed, a new handshake initiation will be sent.
-
-
   \end{enumerate}
+    To mitigate the ``thundering herd'' problem, where 2 peers try to renew the session at the same time, 
+    the initiator is the only one to trigger the rekeying during a valid session. Another mechanism to
+    reduce the probability of this handshake collision, a jitter ($1/3$ second in the linux-implementation of Wireguard) 
+    is added to the expiration time for sending the handshake initation message.
+
+    Wireguard also provides a passive keepalive mechanism to determine the activeness of the connection.
+    After an authenticated transport data is received and the no packet can be sent back for \uppercase{keepalive-timeout} seconds,
+    a keepalive message is sent. The encapsulated payload of this message is just a zero-length buffer,
+    which help distinguish with actual IP payload, using its size. A session can be considered broken
+    when no transport data has been received for (\uppercase{keepalive-timeout} + \uppercase{rekey-timeout}) seconds.
+    This will lead to the resending of the handshake initation message every \uppercase{REKEY-TIMEOUT} seconds.
+
+    About every \uppercase{REKEY-After-time}, the new session keys for the transport data will created,
+    raising the problems of discarding an in-transit encrypted packet from old session. To tackle this,
+    for each peer, Wireguard maintains 3 symmetric keys for the previous, the current and the next session.
+    The sending transport data messages will always be encrypted with the current session key. For
+    the decryption of recieved messages, depending on the receiver index, either the current 
+    or the previous session key will be used. After the initatior completes the handshake, new
+    derived keys will be stored in ``current'', while the previous ``current'' or the previous ``next''
+    session keys will be slided to the previous slot. For the responder, its new derived keys will
+    be kept in the ``next'' slot, waiting to rotate to the ``current'' when a transport data message
+    is received after the handshake. Before rotation, if the ``previous'' session keys is not empty,
+    it must be completely wiped out.
+
+
+
