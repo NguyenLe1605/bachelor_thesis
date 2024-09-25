@@ -1,20 +1,74 @@
-\chapter{Wireguard and 6LoWPAN}
+\chapter{Wireguard Security and the Internet of Things}
   This chapter discusses in details security properties that Wireguard provides and both the benefits
-  and drawback of implementing these features for the 6LoWPAN protocol. Section \ref{iot:silence} is
+  and drawback of adapting these features for the Internet of Things. Section \ref{iot:silence} is
   about the silence nature of Wireguard. Section \ref{iot:crypt} show the resilience of WireGuard
-  against other VPN and transport layer security protocols. Section \ref{iot:cookie} is about the details of 
-  cookie mechanism. Section \ref{iot:perist} is on the optional chatty features of Wireguard.
-  Finally, section \ref{iot:mem} discusses the 6LoWPAN fragmentation impact on the Wireguard messages.
-\section{Silence is a virtue} \label{iot:silence}
+  against other VPN and security protocols at the transport layer. Finally, section \ref{iot:cookie} is about the details of 
+  cookie mechanism. 
+\section{Virtuous Silence} \label{iot:silence}
+  Preventing storing any state before the authentication and transmitting responses to dubious packets
+  is one of the design objectives of Wireguard. With this specific approach, Wireguard is unreachable
+  from the standpoint of unauthenticated peers and network scanners. 
+
+  The threat of mirai botnet can also be eliminated using a correct configuration of 
+  Wireguard interface on the device. Mirai works by first scanning on the IoT device for
+  the TCP port 23 or 2323, then brute-force logining with a random list of credentials \cite{botnet}.
+  With silence nature of Wireguard, if all device's traffic is configured to go through the
+  Wireguard interface except for the external UDP port, mirai won't be able to hijack the
+  device for malicious reasons.
+
+  Wireguard handshake messages are implementated without dynamic memory allocation, which is
+  desirable for network protocol on constrained devices. However, this property demands the
+  first initiator's message to be authenticated  from the responder, opening a risk for
+  replay attack. An adversary could trick the responder into re-creating its ephemeral key
+  by replay the initial handshake initiation, thus nullifying the session of the valid initiator.
+  To tackle this problem, Wireguard includes an encrypted 12-byte TAI64n \cite{tai64} timestamp 
+  in the first message. The responder will now discard handshake packets with timestamp that 
+  is lesser than or equal to the peer's greatest received timestamp. However, a drawback of 
+  this is that the increasing in size of the packet causes the fragmentation of the message.
 \section{Cryptography Resilience} \label{iot:crypt}
-  The design decisions of Wireguard allow the protocol itself and its implementation resistant to
-  solve many problems of the other traditional VPN protocols:
+  Adopting new VPN protocols the for IoT should be cryptographically sound, where existing
+  vulnerabilites in previous protocols should not exist within the implementation. The followings
+  are examples of Wireguard being resistant compare to other security protocols:
   \begin{itemize}
     \item Usage of modern cryptography algorithms prevents cryptographic attacks on TLS
     such as the Sweet32 birthday attacks \cite{sweet32}, the Bleichenbacher threat on RSA encryption \cite{bleichen}, 
     and the padding oracle attack like BEAST \cite{beast}.  Furthermore, problems with using
     constructions like MAC-then-Encrypt in IPsec \cite{ipsec_conf} are eliminated with AEAD in Wireguard.
+    \item Wireguard lacks of cryptography agility \cite{boring} with fixed key exchange and cipher 
+    primitives, thus preventing the  downgrade attack aiming at insecure older version of the 
+    protocol like Lucky Thirteen \cite{lucky} in DTLS/TLS. Given that the underlying algorithm has 
+    to be updated, the newest version must be deployed on the endpoints.
+    \item The risk of vulnerabilites from complex message parsing like Heartbleed \cite{heartbleed} 
+    or parser bugs in X.509 implementations \cite{x509} is mitigated due to the fixed message sizes 
+    during the handshake.
+    \item With the frequent re-transmission of handshake to re-generate the ephemeral key pairs, 
+    attacks taking advantage of key reusing for DH exchange like Racoon attack \cite{raccoon} would be impossible 
+    to launch against the protocol. Even stronger post-quantum security can be enforced with the 
+    use of the pre-shared symmetric key, guaranteeing the forward secrecy of the protocol.
   \end{itemize}
 \section{Cookies and Denial of Services Attack} \label{iot:cookie}
-\section{Stateful firewall} \label{iot:perist}
-\section{Message \& Fragmentation} \label{iot:mem}
+  Curve25519 point multiplication is  CPU extensive \cite{wireguard} and could lead to
+  the exhaustion of battery of constrained devices despite being fast on some processor. In order to
+  protect against this kind of battery-exhaustion attack, a responder could reject handshake message (either
+  initiation or response from the initiator) in an under-load condition, and instead sending back
+  a cookie reply message with a cookie on it. This cookie will be sent in the next handshake initation
+  message from the initiator in the mac2 field.
+  
+  A cookie is an output of a MAC of the initiator's source IP address with a secret random value that
+  changes every two minutes as a key. For the retransmission, a MAC of its message using the cookie 
+  as the MAC key will be sent. As silence is one of the Wireguard virtue, the responder should not 
+  send back any cookie reply message when under load for any unauthenticated packets. Thus, every 
+  handshake packet incorporates a MAC in the mac1 field with the responder's public key at its MAC key. 
+  This at least ensures the sending peer know who it is talking to. The MAC must always be valid 
+  regardless of the under-load condition. 
+  
+  To prevent a man-in-the-middle capturing the plaintext cookie and creating fraudulent messages from it,
+  the sending cookie is encrypted using an AEAD with extended randomize nonce \cite{irtf-cfrg-xchacha-03} 
+  and the responder's public key.
+
+  A final challenge to tackle is a denial-of-service attack on the initiator, where fraudulent cookie
+  is sent to it, making the MAC computing of its message fail. Wireguard solves the problem by using
+  the mac1 field of the previous handshake initiation as the additonal data field of AEAD for cookie encryption. This
+  effectively binds the cookie reply to the initiation message, assuring flow of invalid cookie replies
+  could not stop the initiator to authenticate the correct cookie. These three mechanism work together
+  to mitigate a battery-exhaustion attack on the Wireguard-running constrained device.

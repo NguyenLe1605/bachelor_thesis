@@ -365,3 +365,77 @@ location = {Chicago, Illinois, USA},
 series = {CCS '10}
 }
 
+@inproceedings {botnet,
+author = {Manos Antonakakis and Tim April and Michael Bailey and Matt Bernhard and Elie Bursztein and Jaime Cochran and Zakir Durumeric and J. Alex Halderman and Luca Invernizzi and Michalis Kallitsis and Deepak Kumar and Chaz Lever and Zane Ma and Joshua Mason and Damian Menscher and Chad Seaman and Nick Sullivan and Kurt Thomas and Yi Zhou},
+title = {Understanding the Mirai Botnet},
+booktitle = {26th USENIX Security Symposium (USENIX Security 17)},
+year = {2017},
+isbn = {978-1-931971-40-9},
+address = {Vancouver, BC},
+pages = {1093--1110},
+url = {https://www.usenix.org/conference/usenixsecurity17/technical-sessions/presentation/antonakakis},
+publisher = {USENIX Association},
+month = aug
+}
+
+@misc{boring,
+  author = {Daniel J. Bernstein},
+  title = {Boring crypto},
+  url =  {https://cr.yp.to/talks.html#2015.10.05},
+  year = {2015},
+  month = oct,
+}
+
+@INPROCEEDINGS{lucky,
+  author={Al Fardan, Nadhem J. and Paterson, Kenneth G.},
+  booktitle={2013 IEEE Symposium on Security and Privacy}, 
+  title={Lucky Thirteen: Breaking the TLS and DTLS Record Protocols}, 
+  year={2013},
+  volume={},
+  number={},
+  pages={526-540},
+  keywords={Timing;Encryption;Ciphers;Media Access Protocol;TLS;DTLS;CBC-mode encryption;timing attack;plaintext recovery},
+  doi={10.1109/SP.2013.42}}
+
+@inproceedings {raccoon,
+author = {Robert Merget and Marcus Brinkmann and Nimrod Aviram and Juraj Somorovsky and Johannes Mittmann and J{\"o}rg Schwenk},
+title = {Raccoon Attack: Finding and Exploiting {Most-Significant-Bit-Oracles} in {TLS-DH(E})},
+booktitle = {30th USENIX Security Symposium (USENIX Security 21)},
+year = {2021},
+isbn = {978-1-939133-24-3},
+pages = {213--230},
+url = {https://www.usenix.org/conference/usenixsecurity21/presentation/merget},
+publisher = {USENIX Association},
+month = aug
+}
+
+@misc{x509,
+  author = {Sandrine Bailleux},
+  title = {CVE-2022-47630 Trusted Firmware-A - Out-of-bounds read in X.509 parser},
+  year = {2023},
+  month = jan,
+  url = {https://www.openwall.com/lists/oss-security/2023/01/16/8},
+}
+
+@misc{heartbleed,
+  author = {Nick Sullivan},
+  title = {Staying ahead of OpenSSL vulnerabilities},
+  year = {2014},
+  url = {https://blog.cloudflare.com/staying-ahead-of-openssl-vulnerabilities/},
+}
+
+@techreport{irtf-cfrg-xchacha-03,
+    number =    {draft-irtf-cfrg-xchacha-03},
+    type =      {Internet-Draft},
+    institution =   {Internet Engineering Task Force},
+    publisher = {Internet Engineering Task Force},
+    note =      {Work in Progress},
+    url =       {https://datatracker.ietf.org/doc/draft-irtf-cfrg-xchacha/03/},
+    author =    {Scott Arciszewski},
+    title =     {{XChaCha: eXtended-nonce ChaCha and AEAD\_XChaCha20\_Poly1305}},
+    pagetotal = 18,
+    year =      2020,
+    month =     jan,
+    day =       10,
+    abstract =  {The eXtended-nonce ChaCha cipher construction (XChaCha) allows for ChaCha-based ciphersuites to accept a 192-bit nonce with similar guarantees to the original construction, except with a much lower probability of nonce misuse occurring. This helps for long running TLS connections. This also enables XChaCha constructions to be stateless, while retaining the same security assumptions as ChaCha. This document defines XChaCha20, which uses HChaCha20 to convert the key and part of the nonce into a subkey, which is in turn used with the remainder of the nonce with ChaCha20 to generate a pseudorandom keystream (e.g. for message encryption). This document also defines AEAD\_XChaCha20\_Poly1305, a variant of {[}RFC8439{]} that utilizes the XChaCha20 construction in place of ChaCha20.},
+}
