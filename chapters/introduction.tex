@@ -1,11 +1,21 @@
 \chapter{Introduction}
 \section{Motivation}
+
+  More embedded device, => increase the incentivize to protect the with better security protocol.
   As VPN is mentioned in many papers as not suitable for constrained small IoT Devices, 
   I start to question, is it really the true for in this modern area. 
   As a modern network protocols called wireguard show up, with an aim to replace
   the old, sound but complex protocols like IPSec, we here consider adapting the wireguard
   protocols onto this constrained IoT environment, to see whether this VPN protocol is 
   a good fit for the IoT world or not.
+
+  Threat model is to privacy of the IPv6 packet can't be trace, and end-to-end security 
+  of the sending IP packet where we can't trust the middle router to no have a peak
+  on the sending data.
+
+  This thesis provives an overview of a simple security protoocls called Wireguard, 
+  present the design the implementation for the IoT and discuesses the security
+  properties that it can bring to the IoT worlds.
 
   WireGuard [23] is a new VPN protocol that fits the role of this new pipe
 and it looks quite promising. Note that WireGuard was originally presented
@@ -15,26 +25,6 @@ the WireGuard whitepaper [18].
 WireGuard is designed using modern cryptography, aims for high per-
 formance and reduces the attack surface as a simple protocol. Unlike other
 protocols, no form of negotiation over cryptographic parameters is possible.
-Instead, it uses the following constructions and algorithms:
-Noise protocol framework A collection of cryptographic handshake pat-
-terns which provide building blocks to construct new secure protocols
-with authenticated key agreement [47].
-ChaCha20-Poly1305 The ChaCha20 stream cipher and Poly1305 authen-
-ticator, used in an Authenticated Encryption with Additional Data
-(AEAD) construction. This is also used in modern security protocols
-such as TLS 1.3 [45]. It provides authenticity and confidentiality of
-transported data.
-X25519 An elliptic-curve-Diffie-Hellman (ECDH) function [4]. Compared
-to other functions, it has a rather small key size and simpler require
-ments regarding key validation. It is used in the key agreement proto-
-col.
-HKDF The HMAC-based Key Derivation Function (HKDF) is a construc-
-tion to derive one or more keys from an initial secret [40]. It is used
-to link all pieces of the handshake state to each other, including keys
-and protocol messages. It is also ensures that the original key material
-that is involved in calculations cannot be recovered.
-BLAKE2 A fast cryptographic hash function, BLAKE2s [50], is used by
-the HKDF and as a message authentication code (MAC).
 \section{Organization}
 
   Chapter 2 discusses about the background knowlegde of IoT, RIOT Operating system, and the
@@ -47,11 +37,9 @@ the HKDF and as a message authentication code (MAC).
   Chapter 5 gives an evaluation of wireguard security, and how it help
   the IoT world.
 
-  Chapter 6 gives some related works of other compressed VPN protocols, 
-  and other evaluation of wireguard for constrained devices.
+  Chapter 6 discusses the design and implementation of wireguard.
 
-  Chapter 7 discusses the design and implementation of wireguard.
 
-  Chapter 8 explains the testing of the wireguard.
+  Chapter 7: conclusion and future works of this thesis.
 
-  Chapter 9: conclusion and future works of this thesis.
+List of Abbreviations
