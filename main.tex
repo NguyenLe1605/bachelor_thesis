@@ -14,6 +14,8 @@
 \usepackage{enumitem}
 \usepackage{varwidth}
 \usepackage{tasks}
+\usepackage{xcolor}
+
 
 \usepackage[style=alphabetic]{biblatex}
 \addbibresource{references.bib}
@@ -23,6 +25,31 @@
 \usetikzlibrary{positioning}
 \usetikzlibrary {shapes.geometric}
 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -30,13 +57,58 @@
 
 % Initial fancyhdr setup
 \fancyhead{}
-\fancyhead[RO,LE]{Thesis Title}
-\fancyfoot{}
-\fancyfoot[LE,RO]{\thepage}
-\fancyfoot[LO,CE]{Chapter \thechapter}
-\fancyfoot[CO,RE]{Author Name}
-\renewcommand{\headrulewidth}{0.4pt}
-\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[LE, RO]{\leftmark}
+% \fancyhead{}
+% \fancyhead[RO,LE]{Thesis Title}
+% \fancyfoot{}
+% \fancyfoot[LE,RO]{\thepage}
+% \fancyfoot[LO,CE]{Chapter \thechapter}
+% \fancyfoot[CO,RE]{Author Name}
+% \renewcommand{\headrulewidth}{0.4pt}
+% \renewcommand{\footrulewidth}{0.4pt}
+
+\usepackage[acronym]{glossaries}
+% Create the glossary
+\makeglossaries
+% Define abbreviations
+\newacronym{iot}{IoT}{Internet of things}
+\newacronym{api}{API}{Application programming interface}
+\newacronym{vpn}{VPN}{Virtual private network}
+\newacronym{6lowpan}{6LoWPAN}{IPv6 over low-power wireless personal area networks}
+\newacronym{ip}{IP}{Internet protocol}
+\newacronym{rfid}{RFID}{Radio frequency identification}
+\newacronym{lowpan}{LoWPAN}{Low-power wireless area networks}
+\newacronym{udp}{UDP}{User Datagram Protocol}
+\newacronym{tcp}{TCP}{Transmission Control Protocol}
+\newacronym{icmp}{ICMP}{Internet Control Message Protocol}
+\newacronym{icmpv6}{ICMPv6}{Internet Control Message Protocol version 6}
+\newacronym{aes}{AES}{Advanced Encryption Standard}
+\newacronym{mcu}{MCU}{Microcontroller Unit}
+\newacronym{csma}{CSMA/CA}{Carrier Sense Multiple Access with Collision Avoidance}
+\newacronym{tdma}{TDMA}{Time-division multiple access }
+\newacronym{tisch}{TISCH}{Time Slotted Channel Hopping }
+\newacronym{ism}{ISM}{Industrial, Scientific, and Medical }
+\newacronym{mmu}{MMU}{Memory Management Unit}
+\newacronym{mpu}{MPU}{Memory Protection Unit}
+\newacronym{ram}{RAM}{Random Access Memory}
+\newacronym{rom}{ROM}{Read-only Memory}
+\newacronym{lifo}{LIFO}{Last In, First Out}
+\newacronym{cpu}{CPU}{Central Processing Unit}
+\newacronym{irs}{IRS}{Interrupt Service Routine}
+\newacronym{l2}{L2}{Layer 2}
+\newacronym{lqi}{LQI}{Link Quality Indication}
+\newacronym{rssi}{RSSI}{Received Signal Strength Indicator}
+\newacronym{osi}{OSI}{Open Systems Interconnection}
+\newacronym{rtt}{RTT}{Round Trip Time}
+\newacronym{aead}{AEAD}{Authenticated Encryption with Associated Data}
+\newacronym{psk}{PSK}{Pre-shared Symmetric Key}
+\newacronym{ecdh}{ECDH}{Elliptic Curve Diffie-Hellman}
+\newacronym{hmac}{HMAC}{Hash-based Message Authentication Code}
+\newacronym{mac}{MAC}{Message Authentication Code}
+\newacronym{hkdf}{HKDF}{HMAC-based Key Derivation Function}
+\newacronym{dh}{DH}{Diffie-Hellman}
+\glsaddall
+
 
 \begin{document}
 \begin{titlepage}
@@ -126,7 +198,8 @@
 
 \newpage  % Start a new page after the blank one
 
-\chapter *{\centering Declaration}
+\thispagestyle{empty}
+\section *{\centering Declaration}
 \doublespacing
 \large I hereby declare that this thesis is a product of my own work, unless
 otherwise referenced. I also declare that all opinions, results, conclusions
@@ -139,14 +212,30 @@ opinions of Vietnamese – German University.
 \vspace{0.5cm} % Space between the line and the name
 
 \noindent\hspace{8cm} Le Hoang Dang Nguyen % Right-aligned line for the signature
+\newpage
 
-\chapter*{\centering Acknowledgements}
+\thispagestyle{empty}
+\section *{\centering Acknowledgements}
 I want to thank you.
+\newpage
 
-\chapter*{\centering Abstract}
+\thispagestyle{empty}
+\section*{\centering Abstract}
 Abstract go here
+\newpage
 
+\pagenumbering{roman}
+\renewcommand{\contentsname}{Table of Contents}
+\pagenumbering{roman}
 \tableofcontents
+
+\listoffigures
+\lstlistoflistings 
+\printglossary[type=\acronymtype, title = Abbreviations, nonumberlist]
+\newpage
+
+
+\pagenumbering{arabic} 
 
 \input{chapters/introduction}
 \input{chapters/6lowpan}

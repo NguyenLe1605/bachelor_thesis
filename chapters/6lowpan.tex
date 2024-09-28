@@ -1,14 +1,14 @@
-\chapter{Wireless Embedded Internet}
+\chapter{Wireless Embedded Internet} \label{chap:wei}
 
 This chapter provide the definition and overview of the wireless embedded internet. It covers
-It covers architectures specifically developed for IoT applications, hightlights the 6LoWPAN
-protocol stack that allows the integration of the internet protocol (IP) stack onto this type
+It covers architectures specifically developed for IoT applications, hightlights the \gls{6lowpan}
+protocol stack that allows the integration of the \gls{ip} stack onto this type
 of network, and reviews 802.15.4, a common protocol in embedded context.
 
 \section{Overview}
 The Internet of Things (IoT) comprises of all embedded devices and networks that are natively 
-IP-enabled and connected to the Internet, such as sensors, machines, and RFID readers, 
-alongside the services monitoring and controlling these devices \cite{wie}. A subset of IoT, 
+\gls{ip}-enabled and connected to the Internet, such as sensors, machines, and \gls{rfid} readers, 
+alongside the services monitoring and controlling these devices \cite{wie}. A subset of \gls{iot}, 
 the Wireless Embedded Internet consists of low-power, resource-limited wireless devices 
 connected through standards like IEEE 802.15.4. Integrating standard Internet protocols with such networks 
 presents several challenges:
@@ -91,7 +91,7 @@ presents several challenges:
 
 \section{6LoWPAN Protocol Stack}
   Figure \ref{fig:ip_vs_low} depicts the IPv6 protocol stack with 6LoWPAN in comparison to a standard IP protocol 
-  stack and the corresponding five layers of the Internet Model. This Internet Model 
+  stack and the corresponding five layers of the Internet model. This Internet model 
   connects a wide range of link-layer technologies with various transport and application protocols.
 
   \begin{figure}[h]
@@ -108,12 +108,11 @@ presents several challenges:
   many implementations of the 6LoWPAN stack in embedded devices combine the LoWPAN adaptation layer 
   with IPv6, allowing them to be displayed together as part of the network layer.
 
-  The User Datagram Protocol (UDP) \cite{rfc768} is the most commonly used transport protocol 
-  with 6LoWPAN, and it can be compressed using the LoWPAN format. The Transmission Control 
-  Protocol (TCP) is less frequently used due to concerns about performance, efficiency, and 
+  The \gls{udp} \cite{rfc768} is the most commonly used transport protocol 
+  with 6LoWPAN, and it can be compressed using the LoWPAN format. The \gls{tcp} is less frequently used due to concerns about performance, efficiency, and 
   complexity, although there have been recent efforts on guidance to use and implement TCP for the IoT \cite{rfc9006}. 
-  The Internet Control Message Protocol version 6 (ICMPv6) \cite{rfc4443} is utilized 
-  for control messaging, including functions like ICMP echo requests, destination unreachable messages, 
+  The \gls{icmpv6} \cite{rfc4443} is utilized 
+  for control messaging, including functions like \gls{icmp} echo requests, destination unreachable messages, 
   and Neighbor Discovery. While many application protocols are application-specific and in binary format, 
   there is a growing availability of more standardized application protocols.
 
@@ -121,7 +120,7 @@ presents several challenges:
   Established by the IEEE, the IEEE 802.15.4 standards define low-power wireless radio techniques 
   and specify the physical and media access control layers that serve as the foundation for 6LoWPAN. 
   The IEEE 802.15.4-2011 version of the standards includes features such as access control via 
-  CSMA/CA, optional acknowledgments for retransmission of corrupted data, and 128-bit AES encryption 
+  CSMA/CA, optional acknowledgments for retransmission of corrupted data, and 128-bit  \gls{aes} encryption 
   at the link layer. It offers addressing modes that utilize both 64-bit and 16-bit addresses 
   with unicast and broadcast capabilities. The payload of a physical frame can reach up to 127 bytes, 
   with 72 to 116 bytes of the usable payload after link-layer framing, depending on different addressing 

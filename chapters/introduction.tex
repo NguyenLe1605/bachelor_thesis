@@ -1,45 +1,48 @@
 \chapter{Introduction}
 \section{Motivation}
+  The modern world is showing great interest in the \gls{iot} with the expectation
+  of a significant increase in the number of the internet-connected devices \cite{things}. In 2016, forecasts by 
+  Statista estimated that there would be more than 75 billions \gls{iot} devices in used \cite{stat}. 
+  However, this rapid, unregulated expansion also comes with serious privacy and security challenges \cite{chals}.
+  One such vector of security attack could be the router, the machine standing between the \gls{iot}
+  devices and the internet. In 2018, Cisco researcher found out a new malware called VPNFilter
+  affecting 500,000 networking devices worldwide, including Mikrotic routers \cite{router}. 
+  With such a malware, the hackers may have the ability to hijack any traffic between
+  the device and the internet outside. Thus, better security mechanisms need to be enforce
+  to guarantee an end-to-end (E2E) secure communication of the \gls{iot} devices against such
+  untrustworthy actors.
 
-  More embedded device, => increase the incentivize to protect the with better security protocol.
-  As VPN is mentioned in many papers as not suitable for constrained small IoT Devices, 
-  I start to question, is it really the true for in this modern area. 
-  As a modern network protocols called wireguard show up, with an aim to replace
-  the old, sound but complex protocols like IPSec, we here consider adapting the wireguard
-  protocols onto this constrained IoT environment, to see whether this VPN protocol is 
-  a good fit for the IoT world or not.
+  \gls{vpn} could possibly be one of the approachs. \gls{vpn} does not only 
+  ensure the encryption of network traffic, but also hides away the original addresses coming
+  from the devices, making network communication private to only the owners. However, adapting
+  normal \gls{vpn} technology for \gls{iot} devices faces serious physical limitation of such devices.
+  These devices are usually small, with severe constraints on power, memory, 
+  and processing resources \cite{rfc7228}. On the otherhand, existent \gls{vpn} protocols like OpenVPN or 
+  IPSec are complex, fragile against faulty misconfiguration and have many known vulnerabilites \cite{pwu}. 
+  There has been recent effort on adapting IPSec protocol for the constrained enviroments by
+  reducing the requirements for an implementation to the minimum \cite{rfc9333} and developing
+  a compression framework for the protocol \cite{ietf-ipsecme-diet-esp-01}. 
 
-  Threat model is to privacy of the IPv6 packet can't be trace, and end-to-end security 
-  of the sending IP packet where we can't trust the middle router to no have a peak
-  on the sending data.
+  Another consideration to introduce the \gls{vpn} into the \gls{iot} infrastructure is Wireguard \cite{wireguard}.
+  Wireguard is a modern \gls{vpn} protocol designed for Linux with simplicity and security in mind.
+  While achive multiple security properites, the Wireguard messages still has low overhead 
+  and a potential low memory footprint, making it desirable for the class of constrained devices.
 
-  This thesis provives an overview of a simple security protoocls called Wireguard, 
-  present the design the implementation for the IoT and discuesses the security
-  properties that it can bring to the IoT worlds.
+  The goal of this thesis is to evaluate the merits that Wireguard can bring into the Internet
+  of Things fields and propose an implementation of the protocol for GNRC - a network stack designed
+  specifically for the \gls{iot} enviroment.
 
-  WireGuard [23] is a new VPN protocol that fits the role of this new pipe
-and it looks quite promising. Note that WireGuard was originally presented
-at NDSS 2017 [15], but while the main concepts still apply, the protocol has
-slightly evolved in an incompatible way. The latest version is described in
-the WireGuard whitepaper [18].
-WireGuard is designed using modern cryptography, aims for high per-
-formance and reduces the attack surface as a simple protocol. Unlike other
-protocols, no form of negotiation over cryptographic parameters is possible.
 \section{Organization}
-
-  Chapter 2 discusses about the background knowlegde of IoT, RIOT Operating system, and the
-  6LoWPAN network stack.
-
-  Chapter 3 is about the underlying network stack that powers RIOT - GNRC.
-
-  Chapter 4 is a thorough explaination of the wireguard protocol.
-
-  Chapter 5 gives an evaluation of wireguard security, and how it help
-  the IoT world.
-
-  Chapter 6 discusses the design and implementation of wireguard.
-
-
-  Chapter 7: conclusion and future works of this thesis.
-
-List of Abbreviations
+  The thesis is organized as follows:
+  \begin{itemize}
+    \item Chapter \ref{chap:wei} provides the background knowlegde of \gls{iot}, Wireless embedded internet and
+    \gls{6lowpan}.
+    \item Chapter \ref{chap:gnrc} gives an overview on the GNRC network stack, and RIOT operating
+    system that runs on top of it.
+    \item Chapter \ref{chap:wireguard} explains in details the Wireguard protocol.
+    \item Chapter \ref{chap:eval} describes the security features of Wireguard and evaluate
+    the benefits they can add to the Internet of Things.
+    \item Chapter \ref{chap:des} focuses on the design and important implementation apsects of
+    Wireguard for GNRC.
+    \item The final chapter concludes and summarizes the main works of the thesis.
+  \end{itemize}

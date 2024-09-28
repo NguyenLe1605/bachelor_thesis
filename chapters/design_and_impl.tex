@@ -1,4 +1,4 @@
-\chapter{Design and Implementation of Wireguard for GNRC}
+\chapter{Design and Implementation} \label{chap:des}
 This chapter covers the specific requirements for the Wireguard adaptation for GNRC, the design 
 details to meet the requirements and important implementation aspects inside the Wireguard source
 code for RIOT.
@@ -64,74 +64,316 @@ code for RIOT.
   IoT environment.
 
 \section{Network Interfaces API}
-  Show the supported API.
+  The interface to connect to the Wireguard driver is exposed as a set of functions interacting
+  with the \textbf{gnrc{\_}netif{\_}t} object. The current API is not finalized yet, and future works 
+  will involve abstracting the \textbf{netif} part away, representing as a generic Wireguard tunnel.
+  Code listing \ref{lst:netifapi} shows overview of used functions to communicate with the driver.
 
-  create a netif thread like any other netif.
+  \begin{lstlisting}[caption = Wireguard netif API,language=C, label={lst:netifapi}]
+    int gnrc_netif_wireguard_create(
+      gnrc_netif_t *netif, 
+      char *stack, 
+      int stacksize,
+      char priority, 
+      char *name,
+      netdev_t *dev
+    );
+    inline int gnrc_netif_wireguard_add_ipv6_addr(
+      gnrc_netif_t *netif,
+      ipv6_addr_t *addr,
+      unsigned int pfx_len
+    );
+    void gnrc_netif_wireguard_peer_init(
+      wireguard_netif_peer_t *peer
+    );
+    int gnrc_netif_wireguard_add_peer(
+      gnrc_netif_t *netif,
+      wireguard_netif_peer_t *peer,
+      uint8_t *peer_idx
+    );
+    int gnrc_netif_wireguard_connect(
+      gnrc_netif_t *netif, 
+      uint8_t peer_idx
+    );
+    int gnrc_netif_wireguard_disconnect(
+      gnrc_netif_t *netif, 
+      uint8_t peer_idx
+    );
+  \end{lstlisting}
+
+  The API was largely based on the API of Wireguard for the lwIP stack \cite{lwip}, with
+  a bit of modification to be compatible with the RIOT API. It includes a functions to 
+  spawn the running \textbf{netif} thread to handle sending, receiving 
+  of packet and a function to configure the IPv6 address on the network interface. 
+
+  The \textbf{gnrc{\_}netif{\_}wireguard{\_}peer{\_}init} initializes the  memory of the struct
+  \textbf{wireguard{\_}netif{\_}peer{\_}t} with default values. This netif peer represents
+  the configuration of a peer objects residing on the Wireguard. The corresponding
+  \textbf{gnrc{\_}netif{\_}wireguard{\_}add{\_}peer} finds the free region and populates 
+  the actual peer objects on the Wireguard's list. Code listing \ref{lst:netifpeer} shows
+  the structure of the peer configuration. The object comprises of the pubic key and 
+  the pre-shared key for encryption decryption, the list of allowed ips that the peer will
+  accept, the communication endpoint and the option to turn on/off for persistent keepalive
+  feature.
+
+  \begin{lstlisting}[caption = netif peer configuration,language=C, label={lst:netifpeer}]
+  typedef struct {
+    ipv6_addr_t addr;
+    unsigned int pfx_len;
+  } wireguard_netif_allowed_ip_t;
+
+  typedef struct wireguard_netif_peer {
+    const char *public_key;
+    const uint8_t *preshared_key;
+    wireguard_netif_allowed_ip_t *allowed_ips;
+    int allowed_ips_len;
+    sock_udp_ep_t endpoint;
+    int persistent_keepalive;
+  } wireguard_netif_peer_t;
+  \end{lstlisting}
+
+  The API also support the user to actively connect or disconnect to a peer. The connect
+  functions simply register a handshake initiation transmission event, and the disconnect
+  will wipe out all the symmetric keys plus any paritial handshake on a peer. The intention
+  for the connect function also to reduce the number of time for queuing the transport packets,
+  as the sending packets need to be queued if the session keys have not been created. 
+
+  Later API will include shutting down all the Wireguard state gracefully, more configurations, and
+  an tunnel abstraction over the netif details.
+
+\section{Wireguard device drivers}
+  The core component of Wireguard is implemented using netdev API of RIOT. Following the specification,
+  the initialization process of the driver divides into 2 steps: \textbf{wireguard{\_}setup} to prepare
+  the configuration, and \textbf{wireguard{\_}init} to actually initialize the driver. 
   
-  Mention on the connect problem to start the handshake initation first. Disconnect will
-  disconnect from a peer only. 
+  \begin{lstlisting}[caption = Wireguard driver,language=C, label={lst:wireguarddriver}]
+    typedef struct wireguard_device {
+      netdev_t netdev;
+      wireguard_params_t *params;
+      uint16_t listen_port;
+      sock_udp_t udp;
+      gnrc_netif_t *netif;
+      event_queue_t *evq;
+      struct noise_static_identity static_identity;
+      struct wireguard_peers peers;
+      struct cookie_checker cookie_checker;
+      bool valid;
+    } wireguard_t;
 
-  Shutdown will clean all the peer state of Wireguard. 
-  
-  The netif peer contains the configuration of the peer on the Wireguard drivers.
+  \end{lstlisting}
 
-  Init the peer with default configuration. Adding the peer is concurrently safe as with a 
-  central lock around the list of peer. Allow
-  to add the IPv6 address on a netif like a a normal netif would do.
+  Listing \ref{lst:wireguarddriver} shows the data structure of Wireguard. The \textbf{netdev}
+  is the parent struct to interop with the RIOT structure. The \textbf{params} field
+  contains the initial configuration. The \textbf{udp} is the UDP socket connection with
+  the listening port \textbf{listen{\_}port}. The peers is a thread-safe list of peer. 
+  A cookie checker with the \textbf{static{\_}identity} as the static private/public keypair are
+  also included. A pointer to the original network interfaces and the validity of the driver
+  are required for the driver. The final important detail is the \textbf{event{\_}queue}.
+
+  Instead of spawning a separate thread that runs on an event loop, to satisfy the memory constraint, 
+  the design here is to reuse the existing event queue of \textbf{netif} to handle both reception 
+  of message and timeout. However, this design has a drawback of making the sending always after the 
+  event handler, due to the \textbf{netif} thread processes the awaiting events before dispatching
+  the packets inside the mesage queue. Listing
+  \ref{lst:netifev} illustrates this logic.
+
+  \begin{lstlisting}[caption = Netif event handler,language=C, label={lst:netifev}]
+    static void _process_events_await_msg(gnrc_netif_t *netif, msg_t *msg)
+    {
+        while (1) {
+            /* Using messages for external IPC, and events for internal events */
+
+            /* First drain the queues before blocking the thread */
+            /* Events will be handled before messages */
+            DEBUG("gnrc_netif: handling events\n");
+            event_t *evp;
+            /* We can not use event_loop() or event_wait() because then we would not
+            * wake up when a message arrives */
+            while ((evp = _gnrc_netif_fetch_event(netif))) {
+                DEBUG("gnrc_netif: event %p\n", (void *)evp);
+                if (evp->handler) {
+                    evp->handler(evp);
+                }
+            }
+            /* non-blocking msg check */
+            int msg_waiting = msg_try_receive(msg);
+            if (msg_waiting > 0) {
+                return;
+            }
+            DEBUG("gnrc_netif: waiting for events\n");
+            /* Block the thread until something interesting happens */
+            thread_flags_wait_any(
+              THREAD_FLAG_MSG_WAITING | THREAD_FLAG_EVENT
+            );
+        }
+    }
+  \end{lstlisting}
+
+  Another design decision is to not implement the \textbf{send} and \textbf{recv} of the driver, but instead 
+  customize an api for sending and receiving packets, where the send will handle the write-enabled 
+  \textbf{pktsnip}, and the receving will take the buffer directly from the UDP socket and dispatch the packet 
+  up to the IP layer if it is valid.
+
+  The event queue also handle the triggered timer event. Each peer will maintain its own list 
+  of timers, and push the callback to the event queue when the timer reach their timeout. 
+  To trigger the timeout, the \textbf{event{\_}timeout{\_}t} is utilized with the \textbf{ZTIMER{\_}MSEC}
+  objects. This means the time unit for the timers will be in milliseconds, allowing low-power
+  sleep modes on many platforms.
 \section{Memory allocation \& optmization}
-  The number of peers must be preconfigured, hence the memory for peers are statically configured
-  before hand. Peer that are freed marks with a boolean variable valid to known
-  the peer is usable by other thread or not.
+  To reduce the memory consumption of Wireguard, 3 main points has been employed. Firstly, the default number
+  of peers that a Wireguard driver can maintain is 2 peers. Hence, the user of the network interface
+  API has the responsibility to manage the memory of Wireguard. As of the time of writing, the 
+  feature to change the number of peers have not been actualized yet. Instead of maintaining
+  a dynamic hash map like the linux implementation to store the key pairs and the indices
+  or a radix trie for the search of allowed IP address, 
+  every needed states are in the peer object, a lookup is simply a linear search throughout the list of
+  peers to find the required peer. An example of a look up for allowed IP addresses is in Listing \ref{lst:allowedip}.
 
-  Every search for keypair, generation of index or look up based on the index, allowed ip
-  are linear iteration over all the peer.
+  \begin{lstlisting}[caption = Allowed IP address lookup,language=C, label={lst:allowedip}]
+    struct wireguard_peer *
+    wireguard_peer_lookup_by_allowed_ip(
+      struct wireguard_peers *peers,
+      const ipv6_addr_t *addr) 
+    {
+      struct wireguard_peer *peer = NULL;
+      struct wireguard_peer *tmp;
+      struct wireguard_allowed_ip *allowed;
+      uint8_t best_match = 0;
+      uint8_t match;
+      size_t i;
+      size_t j;
 
-  Instread of Making Wireguard running in its own thread, running in its own event loop
-  with its own queue, Wireguard drivers run in the same thead as the netif, making 
-  use of the existing netif event queue structure and msg box of netif to the handle.
-  Although it enforces an order, however as the sending of packet should know beforehand
-  to ensure the realtime cap, the packet queue won't be overload with the number of concurrent
-  events.
+      mutex_lock(&peers->mtx);
+      for (i = 0; i < MAX_PEERS_PER_DEVICE; ++i) {
+        tmp = &peers->peers[i];
+        if (!tmp->valid) {
+          continue;
+        }
+        /* perform longest prefix match to find the dest ip */
+        for (j = 0; j < MAX_SRC_IPS; ++j) {
+          allowed = &tmp->allowed_source_ips[i];
+          if (!allowed->valid)
+            continue;
+          match = ipv6_addr_match_prefix(&allowed->ip, addr);
+          if (match < allowed->pfx_len)
+            continue;
+          /* the 0 case is when the destination allowed ip is an unspecified IPv6
+          * address */
+          if (match > best_match || best_match == 0) {
+            peer = tmp;
+            best_match = match;
+          }
+          /* found the exact match on the ipv6 address destination */
+          if (best_match == IPV6_ADDR_BIT_LEN) {
+            mutex_unlock(&peers->mtx);
+            return peer;
+          }
+        }
+      }
+      mutex_unlock(&peers->mtx);
+      return peer;
+    }
+  \end{lstlisting}
 
-  There is a packet queue, but only allows the total maximum of the number of peer multiplied by 2.
-  This comes from the assumption is the device either send packet periodically, or sometimes
-  do the sending. If the packet queue is full and there in no handshake session, the packet 
-  is simply discarded.
+  Secondly, the driver has a global static queue for the sending packets 
+  if the symmetric session keys have not been derived. The maxium number of packets that
+  the queue can hold is number of peers multiplied by two. The reason stems from the assumption
+  that the period for the application to send the consecutive packets should be close to the 
+  \textbf{REKEY{\_}TIMEOUT} limit, allowing a peer to retry transmitting the handshake
+  while reserving the original packet in the condition of lossy network. If a handshake 
+  session can not be completed, Wireguard simply discard the queuing packets belong
+  to the peer.
 
-  To reduce the fragmentation, the realloation and the merging of data happens only one during the final preparation
-  of the transport message. The code is a follow, first we allocate enough space for the padded
-  packet and the header. Then copy all the payload after the IPv6 to the end, then slide
-  the orignal IPv6 header to its right place.
+  Finally, as the transport data required to be zero padded, reallocation of the orginal payload
+  are required. With the design of the \textbf{gnrc{\_}pktsnip{\_}t}, a packet is represented as
+  a linked list of header with the next pointer pointing to next header or payload. To reduce
+  the number of merging and reallocation, before sending the IPv6 transport payload, a special
+  prepare function will compute the total required space for the all encrypted payload including
+  the zero-padded trailer and the transport header, copy all header and payload into
+  the reallocate data, release the hold \textbf{pktsnip}, and move the IPv6 header
+  into the corect region. This is applied to the normal transport data only. For a keepalive message,
+  the payload is allocated on the stack and encrypted in the same way of the transport data.
+  The goal of this function is to reduce the memory fragmentation for allocation as much
+  as it possibly can.
+  \begin{lstlisting}[caption = The flow of transport data preparation,language=C, label={lst:prep}]
+    static int wireguard_prepare_transport_snip(
+      gnrc_pktsnip_t *pkt
+    ) 
+    {
+      assert(pkt != NULL);
+      size_t offset;
+      size_t ipheader_offset;
+      size_t plaintext_len;
+      size_t trailer_len;
+      size_t packet_len;
+      uint8_t *buf;
+      uint8_t *ip_end;
+      int res = 0;
+
+      offset = pkt->size;
+      ipheader_offset = offset - 1;
+      plaintext_len = gnrc_pkt_len(pkt);
+      /* routnd to 16 bytes boundary */
+      trailer_len =
+          align_mask(plaintext_len, 16) - plaintext_len + noise_encrypted_len(0);
+      packet_len = TRANSPORT_DATA_HEADER_LEN + plaintext_len + trailer_len;
+      /* Re-allocate data to have enough buffer for:
+      * transport_header + ipv6 packet + payload + padded 0 + auth tag*/
+      res = gnrc_pktbuf_realloc_data(pkt, packet_len);
+      if (res != 0) {
+        DEBUG("[wireguard] send: realloc data failed");
+        return res;
+      }
+
+      /* Copy data to new buffer */
+      buf = ((uint8_t *)pkt->data) + TRANSPORT_DATA_HEADER_LEN;
+      for (gnrc_pktsnip_t *ptr = pkt->next; ptr != NULL; ptr = ptr->next) {
+        memcpy(buf + offset, ptr->data, ptr->size);
+        offset += ptr->size;
+      }
+      /* reverse copying the ipv6 header since the transport header is shorter */
+      ip_end = ((uint8_t *)pkt->data);
+      /* Chapter 5.6: Mitigation Strategies for integer overflow in a reverse for
+      * loop - Secure Coding in C and C++ */
+      for (size_t i = ipheader_offset; i != SIZE_MAX; i--) {
+        buf[i] = ip_end[i];
+      }
+
+      /* Release old pktsnips and data*/
+      gnrc_pktbuf_release(pkt->next);
+      pkt->next = NULL;
+
+      return 0;
+    }
+  \end{lstlisting}
 
 \section{Security Requirements \& Implementations}
-  The packet is silently drop if it no valid. crypto{\_}secure{\_}wipe and crypto{\_}equals are used to
-  handle the comparsion between the keypairs, and the wipe out of the packet state. ensuring
-  there is no leaking.
-  
-  The ECDH implementation include an additional check for zero bytes to prevent the zero public 
-  key.
+  The implementation of the cryptography Noise handshake matches closely to the linux implementation.
+  to ensure the correctness. All the cryptography primitives make use of the API that RIOT 
+  provides. To generate the private key and cookie secretly with low probability to predict, SHA256
+  \cite{rfc6234} pseudo random generator ared used. The ECDH function also include an 
+  additional check for zero bytes to prevent the zero bytes shared argeed key \cite{zeros}.
 
-  Less likey to have concurency bugs because of the sequential nature to handle all the noise 
-  handshake. 
+  Following the silence nature, an invalid packet is silently dropped, but no ICMP packet
+  will be sent back to the interface. To achieve perfect forward secrecy and protect
+  against various potential leaks, crypto{\_}secure{\_}wipe and crypto{\_}equals are used to
+  clean up all the cryptographic state after used and safe comparision between the keys.
 
-  Crypto primitve is implemented in the same way as the Linux does.
+  Regarding the under load condition to prevent the DoS, a simple check on whether the number
+  of events on the event queue is greater than 12 events is sufficient (three quarters of 
+  the limitation of the number of queued events on a thread, which is 16). The sequence space
+  window algorithm \cite[appendix C]{rfc2401} is employed to protect against the transport data replay attack.
 
-  Regarding the under load condition to prevent the DoS, seemly counter the number of event on the
-  event queue, as it thread allow to hanle 16 events at once, the limitation of the number of
-  event is 16 before handle the final handshake, instead sending out the cookie is 12 events at a time.
 \section{Implementation Status}
-  Finished features:
-    handling of Noise handshake state 
-    support of every wireguard messages.
-    timer state machine
-    packet queuing.
-
-  functional enough to communicate with the Linux implementation.
-  
-  Missing features:
-    private key configuration
-    removal of peers
-
-  Problems:
-     on the neighbor cache entry to dispatcht the packet out, still required to install
-     the entry to support sending to the endpoint. 
+  The development of Wireguard for GNRC progressed into a functional prototype with the capability
+  to communicate smoothly with the Linux implementation. The prototype needs more thorough
+  testing and verfication and benchmarking to optimize the memory footprint and performance.
+  The current implementation faces 2 important problems:
+  \begin{itemize}
+    \item The source code of the IP layer to allow the dispatching of IPv6 packet to the 
+    wireguard network interfaces.
+    \item A direct installation of neighbor cache entry for a socket endpoint is required to
+    send the UDP packet out.
+  \end{itemize}
+  Finally, integrate Wireguard into \textbf{ifconfig} tool of the interactive RIOT shell is also
+  an important missing feature for a smoother configuration of the interface.
