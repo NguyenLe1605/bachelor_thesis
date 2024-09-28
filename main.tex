@@ -71,7 +71,7 @@
 % Create the glossary
 \makeglossaries
 % Define abbreviations
-\newacronym{iot}{IoT}{Internet of things}
+\newacronym{iot}{IoT}{Internet of Things}
 \newacronym{api}{API}{Application programming interface}
 \newacronym{vpn}{VPN}{Virtual private network}
 \newacronym{6lowpan}{6LoWPAN}{IPv6 over low-power wireless personal area networks}
@@ -108,6 +108,18 @@
 \newacronym{hkdf}{HKDF}{HMAC-based Key Derivation Function}
 \newacronym{dh}{DH}{Diffie-Hellman}
 \glsaddall
+
+\usepackage{hyperref}
+% Optional: Customize the PDF information
+\hypersetup{
+    bookmarks=true,         % Show bookmarks bar in PDF
+    bookmarksopen=true,     % Open all bookmarks in the outline by default
+    bookmarksnumbered=true, % Add section numbers in bookmarks
+    colorlinks=false,       % Disable colored links (just hyperlinks, no color)
+    hidelinks=true,          % Hide color and borders for all links
+    pdfkeywords={Latex, PDF, Bookmarks}, % Keywords for search engines
+}
+
 
 
 \begin{document}
@@ -216,12 +228,27 @@ opinions of Vietnamese – German University.
 
 \thispagestyle{empty}
 \section *{\centering Acknowledgements}
-I want to thank you.
+\begin{quote}
+  ``Whatever you do in this life, it's not legendary, unless your friends are there to see it.'' \\
+  -- Barney Stinson
+\end{quote}
+I want to express both my gratitude and apologise towards my friends Nguyen Le Anh Quan, and Tran Nguyen Thao Nhi, as they
+had to withstand my rant, my laziness, and my childish behaviors during the time I was doing this thesis. I want to thank
+Dr. Huong for accepting to be my second supervisor. I am also thankful for the help and patience of Professor Hahm
+provided to my idiotic self during this thesis time. I am finally done writing this thesis.
 \newpage
 
 \thispagestyle{empty}
 \section*{\centering Abstract}
-Abstract go here
+With the increase in the number of internet-enabled embedded devices, the requirements for
+an end-to-end secure communication must also be included within the devices. The advent of 
+Wireguard, a modern secure VPN protocol, shows a potential to satisfy this requirement, 
+enhance the privacy of the Internet of Things, while still keeping a low resource profile, which
+is desirable for the constrained devices. The work of this thesis is to provide an implementation
+of Wireguard for GNRC - an IoT network stack, and evaluate the benefits that Wireguard bring 
+to the Internet of Things field.
+
+\textbf{Keywords:} IoT, security, GNRC, RIOT, operating system, Wireguard, cryptography.
 \newpage
 
 \pagenumbering{roman}

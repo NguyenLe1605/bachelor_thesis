@@ -1,48 +1,48 @@
 \chapter{Introduction}
 \section{Motivation}
   The modern world is showing great interest in the \gls{iot} with the expectation
-  of a significant increase in the number of the internet-connected devices \cite{things}. In 2016, forecasts by 
-  Statista estimated that there would be more than 75 billions \gls{iot} devices in used \cite{stat}. 
+  of a significant increase in the number of internet-connected devices \cite{things}. In 2016, forecasts by 
+  Statista estimated that there would be more than 75 billion \gls{iot} devices in use \cite{stat}. 
   However, this rapid, unregulated expansion also comes with serious privacy and security challenges \cite{chals}.
   One such vector of security attack could be the router, the machine standing between the \gls{iot}
-  devices and the internet. In 2018, Cisco researcher found out a new malware called VPNFilter
+  devices and the internet. In 2018, a Cisco researcher found a new malware called VPNFilter
   affecting 500,000 networking devices worldwide, including Mikrotic routers \cite{router}. 
-  With such a malware, the hackers may have the ability to hijack any traffic between
-  the device and the internet outside. Thus, better security mechanisms need to be enforce
+  With such malware, the hackers may have the ability to hijack any traffic between
+  the device and the internet outside. Thus, better security mechanisms need to be enforced
   to guarantee an end-to-end (E2E) secure communication of the \gls{iot} devices against such
   untrustworthy actors.
 
   \gls{vpn} could possibly be one of the approachs. \gls{vpn} does not only 
   ensure the encryption of network traffic, but also hides away the original addresses coming
   from the devices, making network communication private to only the owners. However, adapting
-  normal \gls{vpn} technology for \gls{iot} devices faces serious physical limitation of such devices.
+  normal \gls{vpn} technology for \gls{iot} devices faces serious physical limitations of such devices.
   These devices are usually small, with severe constraints on power, memory, 
-  and processing resources \cite{rfc7228}. On the otherhand, existent \gls{vpn} protocols like OpenVPN or 
-  IPSec are complex, fragile against faulty misconfiguration and have many known vulnerabilites \cite{pwu}. 
-  There has been recent effort on adapting IPSec protocol for the constrained enviroments by
+  and processing resources \cite{rfc7228}. On the other hand, existent \gls{vpn} protocols like OpenVPN or 
+  IPSec are complex, fragile against faulty misconfiguration, and have many known vulnerabilites \cite{pwu}. 
+  There has been recent effort on adapting the IPSec protocol for the constrained enviroments by
   reducing the requirements for an implementation to the minimum \cite{rfc9333} and developing
   a compression framework for the protocol \cite{ietf-ipsecme-diet-esp-01}. 
 
   Another consideration to introduce the \gls{vpn} into the \gls{iot} infrastructure is Wireguard \cite{wireguard}.
   Wireguard is a modern \gls{vpn} protocol designed for Linux with simplicity and security in mind.
-  While achive multiple security properites, the Wireguard messages still has low overhead 
-  and a potential low memory footprint, making it desirable for the class of constrained devices.
+  While achieving multiple security properties, the Wireguard messages still have low overhead 
+  and a potentially low memory footprint, making it desirable for the class of constrained devices.
 
   The goal of this thesis is to evaluate the merits that Wireguard can bring into the Internet
   of Things fields and propose an implementation of the protocol for GNRC - a network stack designed
-  specifically for the \gls{iot} enviroment.
+  specifically for the \gls{iot} environment.
 
 \section{Organization}
   The thesis is organized as follows:
   \begin{itemize}
-    \item Chapter \ref{chap:wei} provides the background knowlegde of \gls{iot}, Wireless embedded internet and
+    \item Chapter \ref{chap:wei} provides the background knowledge of \gls{iot}, Wireless embedded internet, and
     \gls{6lowpan}.
-    \item Chapter \ref{chap:gnrc} gives an overview on the GNRC network stack, and RIOT operating
+    \item Chapter \ref{chap:gnrc} gives an overview of the GNRC network stack, and RIOT operating
     system that runs on top of it.
-    \item Chapter \ref{chap:wireguard} explains in details the Wireguard protocol.
-    \item Chapter \ref{chap:eval} describes the security features of Wireguard and evaluate
+    \item Chapter \ref{chap:wireguard} explains in detail the Wireguard protocol.
+    \item Chapter \ref{chap:eval} describes the security features of Wireguard and evaluates
     the benefits they can add to the Internet of Things.
-    \item Chapter \ref{chap:des} focuses on the design and important implementation apsects of
+    \item Chapter \ref{chap:des} focuses on the design and important implementation aspects of
     Wireguard for GNRC.
     \item The final chapter concludes and summarizes the main works of the thesis.
   \end{itemize}
